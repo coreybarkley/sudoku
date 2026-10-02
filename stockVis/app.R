@@ -1,47 +1,20 @@
+# Load packages ----
 library(shiny)
 library(bslib)
 library(quantmod)
+
+# Source helpers ----
 source("helpers.R")
 
-make_theme <- function(dark = TRUE) {
-	if (dark) {
-		bs_theme(
-			bg = "#0d0d0f",
-			fg = "#93a3af",
-			primary = "#93a3af",
-			secondary = "#93a3af",
-			base_font = font_google("Comic Neue")
-		)
-	} else {
-		bs_theme(
-			bg = "#ffffff",
-			fg = "#0d0d0f",
-			primary = "#93a3af",
-			secondary = "#93a3af",
-			base_font = font_google("Comic Neue")
-		)
-	}
-}
-
+# User interface ----
 ui <- page_sidebar(
-	tags$head(
-		tags$script(HTML(
-			"
-				window.addEventListener('message',function(e) {
-					if (!e.data || e.data.type !== 'theme') return;
-					Shiny.setInputValue(
-						'externalDarkMode',
-						!!e.data.dark,
-						{priority: 'event'}
-					);
-				});
-			"
-		))
+	theme = bs_theme(
+		bg = "#0d0d0f",
+		fg = "#93a3af",
+		primary = "#93a3af",
+		secondary = "#93a3af",
+		base_font = font_google("Comic Neue")
 	),
-
-	# theme = make_theme(FALSE),
-	theme = make_theme(TRUE),
-
 	title = "stockVis",
 	sidebar = sidebar(
 		helpText(
@@ -75,18 +48,8 @@ ui <- page_sidebar(
 	)
 )
 
-server <- function(input, output, session) {
-	observeEvent(input$externalDarkMode, {
-		session$setCurrentTheme(make_theme(isTRUE(input$externalDarkMode)))
-	})
-
-	graphTheme <- reactive({
-		if (isFALSE(input$externalDarkMode)) {
-			return("white")
-		}
-		return("black")
-	})
-
+# Server logic
+server <- function(input, output) {
 	dateMinInput <- reactive({
 		input$dates[1]
 	})
@@ -103,10 +66,6 @@ server <- function(input, output, session) {
 		)
 	})
 
-	name <- reactive({
-		input$symb
-	})
-
 	finalInput <- reactive({
 		if (!input$adjust) {
 			return(dataInput())
@@ -120,14 +79,14 @@ server <- function(input, output, session) {
 
 	output$plot <- renderPlot({
 		chartSeries(
-			x = finalInput(),
+			finalInput(),
+			theme = chartTheme("black"),
 			type = "line",
-			name = name(),
 			log.scale = logInput(),
-			TA = NULL,
-			theme = chartTheme(graphTheme())
+			TA = NULL
 		)
 	})
 }
 
+# Run the app
 shinyApp(ui, server)

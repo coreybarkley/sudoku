@@ -1,0 +1,10 @@
+name: sudoku
+title:
+username: coreybarkley
+account: coreybarkley
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16221882
+bundleId: 11319546
+url: https://coreybarkley.shinyapps.io/sudoku/
+version: 1
